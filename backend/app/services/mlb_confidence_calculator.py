@@ -420,24 +420,24 @@ class MLBConfidenceCalculator:
             if confidence > 0.55:
                 pick += " ML"  # Moneyline for high confidence
             else:
-                pick += " +1.5"  # Runline for lower confidence
+                pick += " -1.5"  # Favorite laying runs
         elif away_factors > home_factors:
             pick = away_name
             if confidence > 0.55:
                 pick += " ML"
             else:
-                pick += " +1.5"
+                pick += " -1.5"  # Favorite laying runs
         # Total pick if that's stronger
         elif over_factors > under_factors:
             pick = "Over Total"
         elif under_factors > over_factors:
             pick = "Under Total"
         else:
-            # Default to better pitcher
+            # Default to underdog with runs
             home_era = home_pitcher.get('era', 4.50)
             away_era = away_pitcher.get('era', 4.50)
             
-            if home_era < away_era:
+            if home_era > away_era:  # Home is worse, so they're underdog
                 pick = f"{home_name} +1.5"
             else:
                 pick = f"{away_name} +1.5"
