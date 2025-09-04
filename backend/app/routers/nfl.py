@@ -143,7 +143,9 @@ def load_games_data() -> List[Dict[str, Any]]:
     
     # Fallback to local JSON if API fails
     paths = [
-        "/Users/sean/Downloads/sean-picks-app/backend/data/sample_nfl_games.json",
+        "data/sample_nfl_games.json",  # Docker container path
+        "/app/data/sample_nfl_games.json",  # Absolute Docker path
+        "/Users/sean/Downloads/sean-picks-app/backend/data/sample_nfl_games.json",  # Local dev
         "/Users/sean/Downloads/sean_picks/data/nfl_odds.json",
         "/Users/sean/Downloads/sean_picks/nfl_odds.json"
     ]
