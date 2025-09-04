@@ -2511,14 +2511,72 @@ body {
     padding: 1rem;
   }
 
-  /* Best bets cards - stack vertically on mobile */
+  /* CRITICAL: Fix top layout container for mobile */
+  .top-layout-container {
+    flex-direction: column !important;
+    gap: 1.5rem;
+    width: 100%;
+  }
+
+  /* CRITICAL: Best bets container must be visible */
+  .best-bets-container {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    display: block !important;
+    margin: 0 !important;
+    padding: 1rem !important;
+  }
+
+  /* Best bets section title */
+  .best-bets-container .section-title {
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .best-bets-container .section-title h2 {
+    font-size: 1.5rem;
+  }
+
+  /* Best bets list/grid */
+  .best-bets-list,
   .best-bets-grid {
-    grid-template-columns: 1fr;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+    width: 100%;
+  }
+
+  /* Individual best bet cards */
+  .best-bet-card {
+    width: 100% !important;
+    padding: 1rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  /* CRITICAL: Right sidebar panels - stack below best bets */
+  .right-sidebar-panels {
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 1rem;
+    margin-top: 0;
+  }
+
+  /* Info panels */
+  .info-panel {
+    width: 100% !important;
+    margin-bottom: 1rem;
+  }
+
+  /* Game cards */
+  .games-grid {
+    grid-template-columns: 1fr !important;
     gap: 1rem;
   }
 
   .game-card {
     padding: 1rem;
+    width: 100%;
   }
 
   .game-header h3 {
@@ -2527,6 +2585,20 @@ body {
 
   .game-time {
     font-size: 0.85rem;
+  }
+
+  /* Bet details within cards */
+  .bet-main {
+    grid-template-columns: 1fr !important;
+  }
+
+  .bet-header {
+    flex-wrap: wrap;
+  }
+
+  .bet-spread,
+  .bet-total {
+    font-size: 1rem;
   }
 
   /* Make tables scrollable */
@@ -2578,6 +2650,20 @@ body {
     font-size: 1.5rem;
   }
 
+  /* Patterns and insights */
+  .bet-patterns {
+    flex-wrap: wrap;
+  }
+
+  .pattern-tag {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .bet-insights li {
+    font-size: 0.85rem;
+  }
+
   /* Hide less important elements on mobile */
   .weather-display {
     display: none;
@@ -2585,6 +2671,18 @@ body {
 
   .other-books-line {
     display: none;
+  }
+
+  /* Content grid for main layout */
+  .content-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem;
+  }
+
+  /* Left sidebar */
+  .left-sidebar {
+    grid-template-columns: 1fr !important;
+    margin-bottom: 1rem;
   }
 }
 
