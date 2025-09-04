@@ -1,0 +1,9 @@
+venv/
+*.pyc
+__pycache__/
+.env
+node_modules/
+build/
+.vercel
+*.db
+.DS_Store

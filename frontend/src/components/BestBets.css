@@ -1,0 +1,353 @@
+/* Compact Professional Best Bets Styling */
+
+/* Override container for more compact layout */
+.best-bets-container {
+  padding: 16px !important;
+}
+
+.best-bets-header {
+  margin-bottom: 12px !important;
+  padding-bottom: 10px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.best-bets-title {
+  font-size: 1.1rem !important;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* Compact bet cards */
+.best-bet-card {
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6));
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  padding: 10px 12px !important;
+  margin-bottom: 8px !important;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.best-bet-card:hover {
+  transform: translateX(3px);
+  border-color: rgba(0, 255, 136, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 255, 136, 0.15);
+}
+
+/* Smaller rank badge */
+.bet-rank-badge {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  width: 20px !important;
+  height: 20px !important;
+  background: linear-gradient(135deg, var(--primary-green), var(--secondary-cyan));
+  color: #000;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 0.7rem !important;
+  box-shadow: 0 1px 3px rgba(0, 255, 136, 0.3);
+}
+
+/* Compact header section */
+.bet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px !important;
+}
+
+.bet-teams {
+  font-size: 0.85rem !important;
+  color: var(--text-primary);
+  font-weight: 600;
+  flex: 1;
+  padding-right: 30px;
+}
+
+.bet-datetime {
+  font-size: 0.7rem !important;
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+/* Compact main section */
+.bet-main {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 8px !important;
+}
+
+.bet-pick-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pick-label {
+  font-size: 0.7rem !important;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pick-details {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pick-team {
+  color: var(--primary-green);
+  font-weight: 700;
+  font-size: 0.85rem !important;
+}
+
+.pick-type {
+  font-size: 0.65rem !important;
+  padding: 2px 6px;
+  background: rgba(79, 209, 197, 0.15);
+  border-radius: 3px;
+  color: var(--secondary-cyan);
+  text-transform: uppercase;
+}
+
+/* Compact confidence display */
+.confidence-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 8px !important;
+  background: rgba(0, 255, 136, 0.08);
+  border-radius: 4px;
+  border: 1px solid rgba(0, 255, 136, 0.2);
+}
+
+.confidence-label {
+  font-size: 0.65rem !important;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.confidence-value {
+  font-size: 0.9rem !important;
+  font-weight: 700;
+  color: var(--primary-green);
+}
+
+/* Compact edge display */
+.edge-value {
+  padding: 4px 8px !important;
+  background: rgba(79, 209, 197, 0.08);
+  border: 1px solid rgba(79, 209, 197, 0.3);
+  border-radius: 4px;
+  color: var(--secondary-cyan);
+  font-weight: 600;
+  font-size: 0.7rem !important;
+  white-space: nowrap;
+}
+
+/* Compact best line section */
+.best-line-section {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 4px;
+  margin-top: 4px;
+}
+
+.best-line-label {
+  font-size: 0.65rem !important;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.best-line-book {
+  font-weight: 600;
+  color: var(--warning-gold);
+  font-size: 0.75rem !important;
+}
+
+.best-line-value {
+  font-weight: 700;
+  color: var(--primary-green);
+  font-size: 0.8rem !important;
+}
+
+.also-at {
+  font-size: 0.65rem !important;
+  color: var(--text-muted);
+  margin-left: 4px;
+}
+
+.other-book {
+  font-size: 0.65rem !important;
+  color: var(--text-secondary);
+  margin-left: 4px;
+}
+
+/* Compact patterns */
+.bet-patterns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.pattern-tag {
+  padding: 2px 6px !important;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  font-size: 0.65rem !important;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* Compact extra info */
+.bet-extra-info {
+  margin-top: 6px !important;
+  padding-top: 6px !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.weather-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem !important;
+}
+
+.weather-icon {
+  font-size: 0.9rem !important;
+}
+
+.weather-temp {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.wind-alert {
+  color: var(--warning-gold);
+  font-size: 0.65rem !important;
+  margin-left: 4px;
+}
+
+.public-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.public-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.public-label {
+  font-size: 0.65rem !important;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.public-bar {
+  width: 60px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.public-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--error-red), var(--warning-gold));
+  transition: width 0.3s ease;
+}
+
+.public-percentage {
+  font-size: 0.7rem !important;
+  font-weight: 600;
+  color: var(--warning-gold);
+}
+
+/* Special styling for top 3 bets */
+.best-bet-card.rank-1 {
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.05), rgba(0, 0, 0, 0.6));
+  border-color: rgba(0, 255, 136, 0.2);
+}
+
+.best-bet-card.rank-1 .bet-rank-badge {
+  background: linear-gradient(135deg, #ffd700, #ffed4e);
+  color: #000;
+  font-weight: 900;
+}
+
+.best-bet-card.rank-2 {
+  background: linear-gradient(135deg, rgba(79, 209, 197, 0.05), rgba(0, 0, 0, 0.6));
+  border-color: rgba(79, 209, 197, 0.15);
+}
+
+.best-bet-card.rank-2 .bet-rank-badge {
+  background: linear-gradient(135deg, #c0c0c0, #e8e8e8);
+  color: #000;
+}
+
+.best-bet-card.rank-3 {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.05), rgba(0, 0, 0, 0.6));
+  border-color: rgba(251, 191, 36, 0.15);
+}
+
+.best-bet-card.rank-3 .bet-rank-badge {
+  background: linear-gradient(135deg, #cd7f32, #e6a158);
+  color: #000;
+}
+
+/* Scrollbar styling for best bets container */
+.best-bets-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.best-bets-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 3px;
+}
+
+.best-bets-container::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 136, 0.3);
+  border-radius: 3px;
+}
+
+.best-bets-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 136, 0.5);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1400px) {
+  .best-bet-card {
+    padding: 8px 10px !important;
+  }
+  
+  .bet-main {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  
+  .confidence-display,
+  .edge-value {
+    display: inline-flex;
+    margin-right: 8px;
+  }
+}
