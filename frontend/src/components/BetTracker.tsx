@@ -50,7 +50,7 @@ const BetTracker: React.FC = () => {
     
     try {
       // Map performance filter to sport parameter
-      const sportParam = performanceFilter === 'all' ? 'NFL' : performanceFilter.toUpperCase();
+      const sportParam = performanceFilter === 'all' ? 'ALL' : performanceFilter.toUpperCase();
       
       // Fetch performance stats
       const perfResponse = await axios.get(
