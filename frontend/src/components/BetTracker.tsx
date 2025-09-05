@@ -43,27 +43,30 @@ const BetTracker: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  }, [timeframe]);
+  }, [timeframe, performanceFilter]);
 
   const fetchData = async () => {
     setLoading(true);
     
     try {
+      // Map performance filter to sport parameter
+      const sportParam = performanceFilter === 'all' ? 'NFL' : performanceFilter.toUpperCase();
+      
       // Fetch performance stats
       const perfResponse = await axios.get(
-        `${API_URL}/api/tracking/performance?days=${timeframe}`
+        `${API_URL}/api/tracking/performance?days=${timeframe}&sport=${sportParam}`
       );
       setPerformance(perfResponse.data);
 
       // Fetch recent results
       const resultsResponse = await axios.get(
-        `${API_URL}/api/tracking/results`
+        `${API_URL}/api/tracking/results?sport=${sportParam}`
       );
       setRecentResults(resultsResponse.data);
 
       // Fetch pending bets
       const pendingResponse = await axios.get(
-        `${API_URL}/api/tracking/pending`
+        `${API_URL}/api/tracking/pending?sport=${sportParam}`
       );
       setPendingBets(pendingResponse.data);
     } catch (error) {

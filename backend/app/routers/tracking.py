@@ -64,22 +64,47 @@ async def get_performance(
     tracker = BetTracker(db)
     stats = tracker.get_performance_stats(days, sport)
     
-    # If no real data, return demo data
+    # If no real data, return demo data based on sport
     if stats.get("total_bets", 0) == 0 or demo:
-        return {
-            "record": "8-3",
-            "win_rate": 72.7,
-            "units": 4.2,
-            "roi": 38.2,
-            "total_bets": 11,
-            "recent_results": [
-                {"team": "Cowboys +3.5", "result": "WIN", "units": 1.0},
-                {"team": "Eagles -7", "result": "LOSS", "units": -1.0},
-                {"team": "Bills -3", "result": "WIN", "units": 1.0},
-                {"team": "Chiefs -6.5", "result": "WIN", "units": 1.0},
-                {"team": "49ers -10", "result": "WIN", "units": 1.0}
-            ]
-        }
+        if sport.upper() == "NCAAF":
+            return {
+                "record": "5-1",
+                "win_rate": 83.3,
+                "units": 3.7,
+                "roi": 61.7,
+                "total_bets": 6,
+                "by_confidence": {
+                    "high": {"record": "3-0", "count": 3},
+                    "medium": {"record": "2-1", "count": 3},
+                    "low": {"record": "0-0", "count": 0}
+                }
+            }
+        elif sport.upper() == "MLB":
+            return {
+                "record": "4-1",
+                "win_rate": 80.0,
+                "units": 2.8,
+                "roi": 56.0,
+                "total_bets": 5,
+                "by_confidence": {
+                    "high": {"record": "1-0", "count": 1},
+                    "medium": {"record": "3-1", "count": 4},
+                    "low": {"record": "0-0", "count": 0}
+                }
+            }
+        else:  # NFL or default
+            return {
+                "record": "6-2",
+                "win_rate": 75.0,
+                "units": 3.4,
+                "roi": 42.5,
+                "total_bets": 8,
+                "by_confidence": {
+                    "high": {"record": "2-0", "count": 2},
+                    "medium": {"record": "4-2", "count": 6},
+                    "low": {"record": "0-0", "count": 0}
+                }
+            }
     
     return stats
 
@@ -123,18 +148,36 @@ async def get_recent_results(
     tracker = BetTracker(db)
     results = tracker.get_recent_results(limit, sport)
     
-    # If no real data, return demo data
+    # If no real data, return demo data based on sport
     if len(results) == 0 or demo:
-        return [
-            {"game": "Cowboys @ Eagles", "pick": "Cowboys +3.5", "spread": 3.5, "confidence": 58.5, "result": "WIN", "score": "20-17", "actual_spread": -3, "game_time": "2025-09-04T00:20:00", "sport": "nfl"},
-            {"game": "Bills @ Jets", "pick": "Bills -3", "spread": -3, "confidence": 60.2, "result": "WIN", "score": "27-20", "actual_spread": -7, "game_time": "2025-09-03T23:20:00", "sport": "nfl"},
-            {"game": "49ers @ Rams", "pick": "49ers -10", "spread": -10, "confidence": 57.8, "result": "LOSS", "score": "24-21", "actual_spread": -3, "game_time": "2025-09-03T20:20:00", "sport": "nfl"},
-            {"game": "Chiefs @ Chargers", "pick": "Chiefs -6.5", "spread": -6.5, "confidence": 62.1, "result": "WIN", "score": "31-21", "actual_spread": -10, "game_time": "2025-09-02T23:20:00", "sport": "nfl"},
-            {"game": "Ravens @ Browns", "pick": "Ravens -7.5", "spread": -7.5, "confidence": 59.3, "result": "WIN", "score": "28-17", "actual_spread": -11, "game_time": "2025-09-02T17:00:00", "sport": "nfl"},
-            {"game": "Packers @ Vikings", "pick": "Vikings +2.5", "spread": 2.5, "confidence": 56.5, "result": "LOSS", "score": "21-24", "actual_spread": 3, "game_time": "2025-09-01T20:20:00", "sport": "nfl"},
-            {"game": "Saints @ Panthers", "pick": "Saints -4", "spread": -4, "confidence": 58.9, "result": "WIN", "score": "27-20", "actual_spread": -7, "game_time": "2025-09-01T17:00:00", "sport": "nfl"},
-            {"game": "Titans @ Colts", "pick": "Colts -3.5", "spread": -3.5, "confidence": 57.2, "result": "WIN", "score": "24-17", "actual_spread": -7, "game_time": "2025-08-31T20:20:00", "sport": "nfl"}
-        ]
+        if sport.upper() == "NCAAF":
+            return [
+                {"game": "Alabama @ Texas", "pick": "Texas -7", "spread": -7, "confidence": 61.2, "result": "WIN", "score": "31-20", "actual_spread": -11, "game_time": "2025-09-04T00:00:00", "sport": "ncaaf"},
+                {"game": "Ohio State @ Michigan", "pick": "Ohio State -3.5", "spread": -3.5, "confidence": 58.8, "result": "LOSS", "score": "24-27", "actual_spread": 3, "game_time": "2025-09-03T20:00:00", "sport": "ncaaf"},
+                {"game": "Georgia @ Florida", "pick": "Georgia -14", "spread": -14, "confidence": 62.5, "result": "WIN", "score": "42-21", "actual_spread": -21, "game_time": "2025-09-03T15:30:00", "sport": "ncaaf"},
+                {"game": "LSU @ Auburn", "pick": "LSU -10", "spread": -10, "confidence": 57.9, "result": "WIN", "score": "35-24", "actual_spread": -11, "game_time": "2025-09-02T19:00:00", "sport": "ncaaf"},
+                {"game": "Clemson @ FSU", "pick": "Clemson -6.5", "spread": -6.5, "confidence": 59.1, "result": "WIN", "score": "28-17", "actual_spread": -11, "game_time": "2025-09-02T12:00:00", "sport": "ncaaf"},
+                {"game": "USC @ Oregon", "pick": "Oregon -9.5", "spread": -9.5, "confidence": 56.7, "result": "LOSS", "score": "31-28", "actual_spread": -3, "game_time": "2025-09-01T20:30:00", "sport": "ncaaf"}
+            ]
+        elif sport.upper() == "MLB":
+            return [
+                {"game": "Yankees @ Red Sox", "pick": "Yankees ML", "spread": -1.5, "confidence": 58.3, "result": "WIN", "score": "7-5", "actual_spread": -2, "game_time": "2025-09-04T23:10:00", "sport": "mlb"},
+                {"game": "Dodgers @ Giants", "pick": "Dodgers -1.5", "spread": -1.5, "confidence": 60.1, "result": "WIN", "score": "8-3", "actual_spread": -5, "game_time": "2025-09-04T02:45:00", "sport": "mlb"},
+                {"game": "Astros @ Rangers", "pick": "Astros ML", "spread": -1.5, "confidence": 57.5, "result": "LOSS", "score": "4-6", "actual_spread": 2, "game_time": "2025-09-03T00:05:00", "sport": "mlb"},
+                {"game": "Braves @ Phillies", "pick": "Braves +1.5", "spread": 1.5, "confidence": 56.9, "result": "WIN", "score": "5-4", "actual_spread": -1, "game_time": "2025-09-02T23:05:00", "sport": "mlb"},
+                {"game": "Cubs @ Cardinals", "pick": "Cardinals ML", "spread": -1.5, "confidence": 58.7, "result": "WIN", "score": "6-2", "actual_spread": -4, "game_time": "2025-09-02T19:45:00", "sport": "mlb"}
+            ]
+        else:  # NFL or default
+            return [
+                {"game": "Cowboys @ Eagles", "pick": "Cowboys +3.5", "spread": 3.5, "confidence": 58.5, "result": "WIN", "score": "20-17", "actual_spread": -3, "game_time": "2025-09-04T00:20:00", "sport": "nfl"},
+                {"game": "Bills @ Jets", "pick": "Bills -3", "spread": -3, "confidence": 60.2, "result": "WIN", "score": "27-20", "actual_spread": -7, "game_time": "2025-09-03T23:20:00", "sport": "nfl"},
+                {"game": "49ers @ Rams", "pick": "49ers -10", "spread": -10, "confidence": 57.8, "result": "LOSS", "score": "24-21", "actual_spread": -3, "game_time": "2025-09-03T20:20:00", "sport": "nfl"},
+                {"game": "Chiefs @ Chargers", "pick": "Chiefs -6.5", "spread": -6.5, "confidence": 62.1, "result": "WIN", "score": "31-21", "actual_spread": -10, "game_time": "2025-09-02T23:20:00", "sport": "nfl"},
+                {"game": "Ravens @ Browns", "pick": "Ravens -7.5", "spread": -7.5, "confidence": 59.3, "result": "WIN", "score": "28-17", "actual_spread": -11, "game_time": "2025-09-02T17:00:00", "sport": "nfl"},
+                {"game": "Packers @ Vikings", "pick": "Vikings +2.5", "spread": 2.5, "confidence": 56.5, "result": "LOSS", "score": "21-24", "actual_spread": 3, "game_time": "2025-09-01T20:20:00", "sport": "nfl"},
+                {"game": "Saints @ Panthers", "pick": "Saints -4", "spread": -4, "confidence": 58.9, "result": "WIN", "score": "27-20", "actual_spread": -7, "game_time": "2025-09-01T17:00:00", "sport": "nfl"},
+                {"game": "Titans @ Colts", "pick": "Colts -3.5", "spread": -3.5, "confidence": 57.2, "result": "WIN", "score": "24-17", "actual_spread": -7, "game_time": "2025-08-31T20:20:00", "sport": "nfl"}
+            ]
     
     return results
 
