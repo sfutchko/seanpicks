@@ -598,9 +598,34 @@ const Dashboard: React.FC = () => {
                       
                       {/* Best Line Available */}
                       {(() => {
+                        // Check if this is a moneyline bet
+                        const isMoneyline = game.pick && game.pick.includes(' ML');
+                        
+                        if (isMoneyline) {
+                          // Show best moneyline odds
+                          const pickTeam = game.pick.replace(' ML', '');
+                          const isHome = pickTeam === game.home_team;
+                          const bestML = isHome ? 
+                            (game.moneylines?.home || (game.spread < 0 ? '-150' : '+130')) :
+                            (game.moneylines?.away || (game.spread > 0 ? '-150' : '+130'));
+                          
+                          return (
+                            <div className="best-line-box">
+                              <div className="best-line-label">📱 BEST LINE:</div>
+                              <div className="best-line-details">
+                                <span className="best-book-name">{game.best_book || 'FanDuel'}</span>
+                                <span className="best-book-spread">ML {bestML}</span>
+                              </div>
+                              <div className="other-books-line">
+                                <span className="also-at">Shop around for best ML odds</span>
+                              </div>
+                            </div>
+                          );
+                        }
+                        
                         const bestLine = getBestLine(game);
                         if (bestLine && game.book_odds && Object.keys(game.book_odds).length > 0) {
-                          // Get other good books
+                          // Get other good books for spread
                           // Determine if picking home or away
                           const pickingAway = game.pick && game.pick.includes(game.away_team);
                           
@@ -642,6 +667,15 @@ const Dashboard: React.FC = () => {
                                 <span className="best-book-name">Check Multiple Books</span>
                                 <span className="best-book-spread">
                                   {(() => {
+                                    // Check if it's ML
+                                    if (isMoneyline) {
+                                      const pickTeam = game.pick.replace(' ML', '');
+                                      const isHome = pickTeam === game.home_team;
+                                      const mlOdds = isHome ? 
+                                        (game.spread < 0 ? '-150' : '+130') :
+                                        (game.spread > 0 ? '-150' : '+130');
+                                      return 'ML ' + mlOdds;
+                                    }
                                     // Extract spread from pick string for consistency
                                     const pickMatch = game.pick?.match(/([+-]?\d+\.?\d*)/);
                                     if (pickMatch) {
@@ -654,9 +688,12 @@ const Dashboard: React.FC = () => {
                                 </span>
                               </div>
                               <div className="other-books-line">
-                                <span className="also-at">Line: {game.pick && game.pick.includes(game.away_team) ? 
-                                  ((-game.spread) > 0 ? '+' : '') + (-game.spread) : 
-                                  (game.spread > 0 ? '+' : '') + game.spread} at most books</span>
+                                <span className="also-at">
+                                  {isMoneyline ? 'Check moneyline odds at multiple books' : 
+                                   `Line: ${game.pick && game.pick.includes(game.away_team) ? 
+                                    ((-game.spread) > 0 ? '+' : '') + (-game.spread) : 
+                                    (game.spread > 0 ? '+' : '') + game.spread} at most books`}
+                                </span>
                               </div>
                             </div>
                           );
