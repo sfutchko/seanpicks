@@ -613,7 +613,7 @@ const Dashboard: React.FC = () => {
                             <div className="best-line-box">
                               <div className="best-line-label">📱 BEST LINE:</div>
                               <div className="best-line-details">
-                                <span className="best-book-name">{game.best_book || 'FanDuel'}</span>
+                                <span className="best-book-name">FanDuel</span>
                                 <span className="best-book-spread">ML {bestML}</span>
                               </div>
                               <div className="other-books-line">
@@ -703,16 +703,42 @@ const Dashboard: React.FC = () => {
                       <div className="bet-odds-info">
                         <div className="odds-row">
                           <span className="odds-label">Spread:</span>
-                          <span className="odds-value">{formatSpread(game.spread)}</span>
+                          <span className="odds-value">
+                            {(() => {
+                              // Extract spread from pick string for consistency
+                              const pickMatch = game.pick?.match(/([+-]?\d+\.?\d*)/);
+                              if (pickMatch) {
+                                const spread = parseFloat(pickMatch[1]);
+                                return (spread > 0 ? '+' : '') + spread;
+                              }
+                              // Fallback: determine from pick team
+                              if (game.pick) {
+                                const pickTeam = game.pick.replace(/ ML| [+-]?\d+\.?\d*/, '').trim();
+                                const pickingAway = pickTeam === game.away_team;
+                                const displaySpread = pickingAway ? -game.spread : game.spread;
+                                return formatSpread(displaySpread);
+                              }
+                              return formatSpread(game.spread);
+                            })()}
+                          </span>
                         </div>
                         <div className="odds-row">
                           <span className="odds-label">ML:</span>
                           <span className="odds-value">
-                            {game.moneylines?.home || game.moneylines?.away ? 
-                              (game.spread < 0 ? 
-                                (game.moneylines?.home || '-150') : 
-                                (game.moneylines?.away || '+130')) 
-                              : 'N/A'}
+                            {(() => {
+                              // Determine which team we're picking
+                              if (game.pick) {
+                                const pickTeam = game.pick.replace(/ ML| [+-]?\d+\.?\d*/, '').trim();
+                                const isHome = pickTeam === game.home_team;
+                                if (isHome) {
+                                  return game.moneylines?.home || (game.spread < 0 ? '-150' : '+130');
+                                } else {
+                                  return game.moneylines?.away || (game.spread > 0 ? '-150' : '+130');
+                                }
+                              }
+                              // Fallback
+                              return game.moneylines?.home || game.moneylines?.away || 'N/A';
+                            })()}
                           </span>
                         </div>
                         <div className="odds-row">
