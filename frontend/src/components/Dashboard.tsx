@@ -73,14 +73,16 @@ interface ParlayLeg {
 }
 
 interface ParlayRec {
-  legs: ParlayLeg[];
+  legs: ParlayLeg[] | number;
   potential_payout: number;
-  recommended_bet: number;
+  recommended_bet?: number;
   expected_value: number;
   confidence: number;
   type?: string;
   games?: any[];
   multiplier?: number;
+  combined_confidence?: number;
+  recommendation?: string;
 }
 
 const Dashboard: React.FC = () => {
@@ -898,17 +900,27 @@ const Dashboard: React.FC = () => {
                   <div key={index} className="info-item parlay-item">
                     <div className="parlay-header">
                       <span className="parlay-type">{parlay.type || '3-team'}</span>
-                      <span className="parlay-confidence">{((parlay.confidence || 0.55) * 100).toFixed(0)}%</span>
+                      <span className="parlay-confidence">{
+                        parlay.confidence ? 
+                          Math.round(parlay.confidence) + '%' : 
+                          '60%'
+                      }</span>
                     </div>
                     <div className="parlay-legs">
-                      <span className="parlay-legs-count">{parlay.legs?.length || 3} legs</span>
+                      <span className="parlay-legs-count">
+                        {typeof parlay.legs === 'number' ? parlay.legs : (parlay.legs?.length || parlay.games?.length || 3)} legs
+                      </span>
                     </div>
                     {parlay.games && (
                       <div className="parlay-games">
                         {parlay.games.slice(0, 3).map((game: any, i: number) => (
                           <div key={i} className="parlay-game">
                             <span className="parlay-team">{game.team}</span>
-                            <span className="parlay-spread">{game.spread > 0 ? '+' : ''}{game.spread}</span>
+                            <span className="parlay-spread">
+                              {typeof game.spread === 'string' ? 
+                                game.spread : 
+                                (game.spread > 0 ? '+' : '') + game.spread}
+                            </span>
                           </div>
                         ))}
                       </div>

@@ -7,8 +7,7 @@ from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 from app.models.user import User
 # Authentication removed - public access
-from app.routers.nfl import load_games_data as load_nfl_games
-from app.routers.ncaaf import load_games_data as load_ncaaf_games
+# Import the actual load_games_data functions directly
 from app.services.confidence_calculator import ConfidenceCalculator
 from app.services.mlb_data_aggregator import MLBDataAggregator
 from app.services.mlb_analyzer import MLBCompleteAnalyzer
@@ -46,63 +45,102 @@ async def get_parlay_recommendations(
 ):
     """Get optimized parlay recommendations using intelligent builder"""
     
-    calculator = ConfidenceCalculator()
     parlay_builder = IntelligentParlayBuilder()
     all_games = []
     
-    # Try to load NFL games
+    # Load NFL games DIRECTLY from data source
     if sport in ["all", "nfl"]:
         try:
-            nfl_games = load_nfl_games()
-            for idx, game in enumerate(nfl_games):
-                # Add pick to game data
-                if 'pick' in game and game['pick']:
-                    confidence = calculator.calculate_confidence(
-                        sharp_action=game.get("sharp_action", False),
-                        reverse_line_movement=game.get("reverse_line_movement", False),
-                        steam_move=game.get("steam_move", False),
-                        public_fade=game.get("contrarian", False),
-                        key_number_edge=abs(game.get("spread", 0)) in [3, 7, 10]
-                    )
-                    game['confidence'] = confidence
-                    game['sport'] = 'NFL'
-                    game['id'] = f'nfl_{idx}'
-                    all_games.append(game)
+            from app.routers.nfl import load_games_data
+            from app.services.complete_analyzer import CompleteAnalyzer
+            
+            # Load raw games and analyze them
+            analyzer = CompleteAnalyzer()
+            raw_games = load_games_data()
+            
+            # Process ALL games and sort by confidence
+            analyzed_games = []
+            for idx, game in enumerate(raw_games):
+                analysis = analyzer.analyze_game_complete(game)
+                confidence = analysis['final_confidence']
+                best_bet = analysis.get('best_bet')
+                
+                if best_bet and confidence >= 0.55:
+                    game_obj = {
+                        'id': f'nfl_{idx}',
+                        'sport': 'NFL',
+                        'home_team': game.get('home_team'),
+                        'away_team': game.get('away_team'),
+                        'game_time': game.get('game_time'),
+                        'spread': game.get('spread', 0),
+                        'total': game.get('total', 45),
+                        'pick': best_bet['pick'],  # USE THE ACTUAL PICK
+                        'confidence': confidence,  # USE THE ACTUAL CONFIDENCE
+                        'sharp_action': game.get('sharp_action', False),
+                        'reverse_line_movement': game.get('reverse_line_movement', False),
+                        'steam_move': game.get('steam_move', False),
+                        'contrarian': game.get('contrarian', False)
+                    }
+                    analyzed_games.append(game_obj)
+            
+            # Sort by confidence and take only the BEST games
+            analyzed_games.sort(key=lambda x: x['confidence'], reverse=True)
+            all_games.extend(analyzed_games[:6])  # Take top 6 for parlays
         except Exception as e:
             logger.error(f"Failed to load NFL games: {e}")
     
-    # Load NCAAF games
+    # Load NCAAF games DIRECTLY from data source
     if sport in ["all", "ncaaf"]:
         try:
-            ncaaf_games = load_ncaaf_games()
-            for idx, game in enumerate(ncaaf_games):
-                if 'pick' in game and game['pick']:
-                    confidence = calculator.calculate_confidence(
-                        sharp_action=game.get("sharp_action", False),
-                        reverse_line_movement=game.get("reverse_line_movement", False),
-                        steam_move=game.get("steam_move", False),
-                        public_fade=game.get("contrarian", False),
-                        key_number_edge=abs(game.get("spread", 0)) in [3, 7, 10, 14]
-                    )
-                    game['confidence'] = confidence
-                    game['sport'] = 'NCAAF'
-                    game['id'] = f'ncaaf_{idx}'
-                    all_games.append(game)
+            from app.routers.ncaaf import load_games_data
+            from app.services.ncaaf_analyzer import NCAAFAnalyzer
+            
+            # Load raw games and analyze them
+            analyzer = NCAAFAnalyzer()
+            raw_games = load_games_data()
+            
+            # Process ALL games and sort by confidence
+            analyzed_games = []
+            for idx, game in enumerate(raw_games):
+                analysis = analyzer.analyze_game(game)
+                
+                if analysis.get('pick') and analysis.get('confidence', 0) >= 0.55:
+                    game_obj = {
+                        'id': f'ncaaf_{idx}',
+                        'sport': 'NCAAF',
+                        'home_team': game.get('home_team'),
+                        'away_team': game.get('away_team'),
+                        'game_time': game.get('game_time'),
+                        'spread': game.get('spread', 0),
+                        'total': game.get('total', 45),
+                        'pick': analysis['pick'],
+                        'confidence': analysis['confidence'],
+                        'sharp_action': game.get('sharp_action', False),
+                        'reverse_line_movement': game.get('reverse_line_movement', False),
+                        'steam_move': game.get('steam_move', False),
+                        'contrarian': game.get('contrarian', False)
+                    }
+                    analyzed_games.append(game_obj)
+            
+            # Sort by confidence and take only the BEST games
+            analyzed_games.sort(key=lambda x: x['confidence'], reverse=True)
+            all_games.extend(analyzed_games[:6])  # Take top 6 for parlays
         except Exception as e:
             logger.error(f"Failed to load NCAAF games: {e}")
     
-    # Load MLB games
+    # Load MLB games and sort by confidence
     if sport in ["all", "mlb"]:
         try:
             mlb_aggregator = MLBDataAggregator()
             mlb_analyzer = MLBCompleteAnalyzer()
             mlb_games_raw = mlb_aggregator.get_todays_games()
             
+            analyzed_games = []
             for idx, game_raw in enumerate(mlb_games_raw):
                 # Analyze the game
                 analysis = mlb_analyzer.analyze_game(game_raw)
                 
-                if 'pick' in analysis and analysis['pick']:
+                if 'pick' in analysis and analysis['pick'] and analysis.get('confidence', 0) >= 0.52:
                     # Convert to parlay format
                     game = {
                         'home_team': analysis['home_team'],
@@ -118,7 +156,11 @@ async def get_parlay_recommendations(
                         'venue': analysis.get('venue', ''),
                         'weather': analysis.get('weather')
                     }
-                    all_games.append(game)
+                    analyzed_games.append(game)
+            
+            # Sort by confidence and take only the BEST games
+            analyzed_games.sort(key=lambda x: x['confidence'], reverse=True)
+            all_games.extend(analyzed_games[:6])  # Take top 6 for parlays
         except Exception as e:
             logger.error(f"Failed to load MLB games: {e}")
     
@@ -133,7 +175,7 @@ async def get_parlay_recommendations(
             "type": parlay['type'],
             "legs": parlay.get('legs', len(parlay.get('games', []))),
             "games": parlay.get('games', []),
-            "confidence": parlay.get('confidence', 0) / 100.0,  # Convert back to decimal
+            "confidence": parlay.get('confidence', 0),  # Keep as percentage
             "combined_confidence": parlay.get('combined_confidence', 0),
             "multiplier": parlay['multiplier'],
             "potential_payout": parlay['potential_payout'],

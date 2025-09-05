@@ -135,8 +135,8 @@ class IntelligentParlayBuilder:
                         "game": f"{combo[1].get('away_team')} @ {combo[1].get('home_team')}"
                     }
                 ],
-                "confidence": round(combined_prob * 100, 1),
-                "combined_confidence": round(combined_prob * 100, 1),
+                "confidence": round((prob1 + prob2) / 2 * 100, 1),  # Average confidence for display
+                "combined_confidence": round(combined_prob * 100, 1),  # Actual combined probability
                 "multiplier": multiplier,
                 "potential_payout": round(potential_payout, 2),
                 "expected_value": round(expected_value, 2),
@@ -192,8 +192,8 @@ class IntelligentParlayBuilder:
                             }
                             for pick, game in zip(picks, combo)
                         ],
-                        "confidence": round(combined_prob * 100, 1),
-                        "combined_confidence": round(combined_prob * 100, 1),
+                        "confidence": round(sum(probs) / len(probs) * 100, 1),  # Average confidence for display
+                        "combined_confidence": round(combined_prob * 100, 1),  # Actual combined probability
                         "multiplier": multiplier,
                         "potential_payout": round(potential_payout, 2),
                         "expected_value": round(expected_value, 2),
@@ -219,9 +219,12 @@ class IntelligentParlayBuilder:
                 'spread': 'ML'
             }
         elif 'OVER' in pick_str or 'UNDER' in pick_str:
-            # Total pick
+            # Total pick - extract the actual matchup
+            home = game.get('home_team', '')
+            away = game.get('away_team', '')
+            matchup = f"{away} @ {home}" if home and away else pick_str
             return {
-                'team': pick_str,
+                'team': matchup,
                 'type': 'TOTAL',
                 'spread': pick_str
             }
