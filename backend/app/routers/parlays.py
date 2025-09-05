@@ -182,7 +182,7 @@ async def get_parlay_recommendations(
         "parlays": parlays[:10],
         "best_parlay": best_parlay,
         "suggested_bet": 20,  # 2% of $1000 bankroll
-        "bankroll": current_user.bankroll
+        "bankroll": 1000  # Default bankroll
     }
 
 @router.post("/calculate")
