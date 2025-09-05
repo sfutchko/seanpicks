@@ -329,7 +329,8 @@ class BetTracker:
                 'result': bet.result,
                 'score': f"{bet.away_score}-{bet.home_score}",
                 'actual_spread': bet.actual_spread,
-                'game_time': bet.game_time.isoformat()
+                'game_time': bet.game_time.isoformat(),
+                'sport': bet.sport.lower() if bet.sport else 'nfl'
             })
         
         return results

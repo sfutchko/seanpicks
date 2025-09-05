@@ -102,7 +102,8 @@ async def get_pending_bets(
             "confidence": bet.confidence,
             "game_time": bet.game_time.isoformat(),
             "first_seen": bet.first_seen.isoformat(),
-            "times_appeared": bet.times_appeared
+            "times_appeared": bet.times_appeared,
+            "sport": bet.sport.lower() if bet.sport else 'nfl'
         }
         for bet in pending
     ]
@@ -135,62 +136,19 @@ async def update_scores(
 ):
     """
     Fetch and update game scores for tracked bets
+    Uses improved date matching to get the right games
     """
-    import aiohttp
+    from app.services.score_updater import ScoreUpdater
     
-    # Fetch scores directly
-    fetcher = ResultFetcher("d4fa91883b15fd5a5594c64e58b884ef")
+    # Note: NFL scores from Odds API appear unreliable
+    # MLB scores are more accurate when matched by date
+    updater = ScoreUpdater("d4fa91883b15fd5a5594c64e58b884ef", db)
+    result = await updater.update_scores(sport)
     
-    # Fetch scores from API
-    url = f"{fetcher.base_url}/sports/{sport}/scores"
-    params = {
-        'apiKey': fetcher.api_key,
-        'daysFrom': 2  # Get scores from last 2 days to ensure we catch all games
-    }
+    if result.get('errors'):
+        logger.warning(f"Score update errors: {result['errors']}")
     
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url, params=params) as response:
-            if response.status == 200:
-                scores = await response.json()
-                
-                # Update tracked bets
-                tracker = BetTracker(db)
-                updated_count = 0
-                
-                for game in scores:
-                    if game.get('completed'):
-                        game_id = game['id']
-                        home_team = game['home_team']
-                        away_team = game['away_team']
-                        
-                        # Extract scores
-                        home_score = None
-                        away_score = None
-                        
-                        for score_data in game.get('scores', []):
-                            if score_data['name'] == home_team:
-                                home_score = int(score_data['score']) if score_data['score'] is not None else None
-                            elif score_data['name'] == away_team:
-                                away_score = int(score_data['score']) if score_data['score'] is not None else None
-                        
-                        if home_score is not None and away_score is not None:
-                            # Try to update by game_id first, then by team names
-                            result = tracker.update_game_result(game_id, home_score, away_score)
-                            if not result:
-                                # Try to match by team names if game_id doesn't match
-                                result = tracker.update_game_result_by_teams(home_team, away_team, home_score, away_score)
-                            
-                            if result:
-                                updated_count += 1
-                                logger.info(f"Updated result for {away_team} @ {home_team}: {away_score}-{home_score}")
-                
-                return {
-                    "message": f"Score update completed",
-                    "games_checked": len(scores),
-                    "bets_updated": updated_count
-                }
-            else:
-                return {"message": f"Failed to fetch scores: {response.status}", "error": True}
+    return result
 
 
 from pydantic import BaseModel

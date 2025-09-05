@@ -58,13 +58,25 @@ async def get_live_games(
         if scores_response.status_code == 200:
             for game_score in scores_response.json():
                 game_id = game_score.get('id')
+                home_team = game_score.get('home_team')
+                away_team = game_score.get('away_team')
                 scores = game_score.get('scores', [])
-                if scores and len(scores) >= 2:
-                    scores_data[game_id] = {
-                        'home_score': scores[0].get('score', '0'),
-                        'away_score': scores[1].get('score', '0'),
-                        'completed': game_score.get('completed', False)
-                    }
+                
+                # Parse scores correctly by matching team names
+                home_score = '0'
+                away_score = '0'
+                if scores:  # Check if scores is not None
+                    for score in scores:
+                        if score.get('name') == home_team:
+                            home_score = score.get('score', '0')
+                        elif score.get('name') == away_team:
+                            away_score = score.get('score', '0')
+                
+                scores_data[game_id] = {
+                    'home_score': home_score,
+                    'away_score': away_score,
+                    'completed': game_score.get('completed', False)
+                }
         
         if response.status_code == 200:
             all_games = response.json()

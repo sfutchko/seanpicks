@@ -133,8 +133,12 @@ const BetTracker: React.FC = () => {
       );
       
       const data = response.data;
-      alert(`Score update completed! Checked ${data.games_checked} games, updated ${data.bets_updated} bets.`);
-      setTimeout(fetchData, 1000); // Refresh after 1 second
+      if (data.error) {
+        alert(`⚠️ ${data.message}\n\nReason: ${data.reason}\n\n${data.recommendation}`);
+      } else {
+        alert(`Score update completed! Checked ${data.games_checked} games, updated ${data.bets_updated} bets.`);
+        setTimeout(fetchData, 1000); // Refresh after 1 second
+      }
     } catch (error: any) {
       console.error('Error updating scores:', error);
       alert(`Error updating scores: ${error.response?.data?.message || error.message}`);
@@ -320,7 +324,17 @@ const BetTracker: React.FC = () => {
                       {bet.game}
                     </td>
                     <td>{bet.pick}</td>
-                    <td>{bet.spread > 0 ? '+' : ''}{bet.spread}</td>
+                    <td>
+                    {(() => {
+                      // Extract spread from pick string (e.g., "Team +3.5" -> "+3.5")
+                      const pickMatch = bet.pick.match(/([+-]?\d+\.?\d*)/);
+                      if (pickMatch) {
+                        const spread = parseFloat(pickMatch[1]);
+                        return (spread > 0 ? '+' : '') + spread;
+                      }
+                      return bet.spread > 0 ? '+' + bet.spread : bet.spread;
+                    })()}
+                  </td>
                     <td>{bet.confidence}%</td>
                     <td>
                       <span style={{ color: getResultColor(bet.result), fontWeight: 'bold' }}>
@@ -368,7 +382,17 @@ const BetTracker: React.FC = () => {
                     {bet.game}
                   </td>
                   <td>{bet.pick}</td>
-                  <td>{bet.spread > 0 ? '+' : ''}{bet.spread}</td>
+                  <td>
+                    {(() => {
+                      // Extract spread from pick string (e.g., "Team +3.5" -> "+3.5")
+                      const pickMatch = bet.pick.match(/([+-]?\d+\.?\d*)/);
+                      if (pickMatch) {
+                        const spread = parseFloat(pickMatch[1]);
+                        return (spread > 0 ? '+' : '') + spread;
+                      }
+                      return bet.spread > 0 ? '+' + bet.spread : bet.spread;
+                    })()}
+                  </td>
                   <td>{(bet.confidence * 100).toFixed(1)}%</td>
                   <td>{new Date(bet.game_time).toLocaleString()}</td>
                   <td>{bet.times_appeared}</td>

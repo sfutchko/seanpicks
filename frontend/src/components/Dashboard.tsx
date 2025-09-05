@@ -640,9 +640,18 @@ const Dashboard: React.FC = () => {
                               <div className="best-line-label">📱 BEST LINE:</div>
                               <div className="best-line-details">
                                 <span className="best-book-name">Check Multiple Books</span>
-                                <span className="best-book-spread">{game.pick && game.pick.includes(game.away_team) ? 
-                                  ((-game.spread) > 0 ? '+' : '') + (-game.spread) : 
-                                  (game.spread > 0 ? '+' : '') + game.spread}</span>
+                                <span className="best-book-spread">
+                                  {(() => {
+                                    // Extract spread from pick string for consistency
+                                    const pickMatch = game.pick?.match(/([+-]?\d+\.?\d*)/);
+                                    if (pickMatch) {
+                                      const spread = parseFloat(pickMatch[1]);
+                                      return (spread > 0 ? '+' : '') + spread;
+                                    }
+                                    // Fallback
+                                    return game.spread > 0 ? '+' + game.spread : game.spread;
+                                  })()}
+                                </span>
                               </div>
                               <div className="other-books-line">
                                 <span className="also-at">Line: {game.pick && game.pick.includes(game.away_team) ? 
