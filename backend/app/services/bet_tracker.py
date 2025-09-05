@@ -24,7 +24,7 @@ class BetTracker:
     def __init__(self, db: Session):
         self.db = db
     
-    def track_best_bet(self, game: Dict, analysis: Dict) -> TrackedBet:
+    def track_best_bet(self, game: Dict, analysis: Dict, sport: str = None) -> TrackedBet:
         """
         Add or update a best bet in the tracking system
         """
@@ -49,6 +49,16 @@ class BetTracker:
             if game_time_str.endswith('Z'):
                 game_time_str = game_time_str[:-1] + '+00:00'
             
+            # Determine sport from game data or use provided sport
+            if sport is None:
+                # Try to detect sport from game ID or team names
+                if 'mlb' in game.get('id', '').lower() or 'baseball' in game.get('id', '').lower():
+                    sport = 'MLB'
+                elif 'ncaaf' in game.get('id', '').lower() or 'college' in game.get('id', '').lower():
+                    sport = 'NCAAF'
+                else:
+                    sport = 'NFL'  # Default to NFL
+            
             bet = TrackedBet(
                 id=bet_id,
                 game_id=game['id'],
@@ -67,6 +77,7 @@ class BetTracker:
                 public_percentage=analysis.get('public_percentage'),
                 sharp_action=analysis.get('sharp_action'),
                 weather=game.get('weather'),
+                sport=sport,
                 result='PENDING'
             )
             self.db.add(bet)
@@ -225,11 +236,17 @@ class BetTracker:
         """
         cutoff_date = datetime.utcnow() - timedelta(days=days)
         
-        # Query completed bets
-        bets = self.db.query(TrackedBet).filter(
+        # Query completed bets for specific sport
+        query = self.db.query(TrackedBet).filter(
             TrackedBet.first_seen >= cutoff_date,
             TrackedBet.result.in_(['WIN', 'LOSS', 'PUSH'])
-        ).all()
+        )
+        
+        # Filter by sport if not "all"
+        if sport and sport.upper() != "ALL":
+            query = query.filter(TrackedBet.sport == sport.upper())
+            
+        bets = query.all()
         
         if not bets:
             return {
@@ -278,17 +295,29 @@ class BetTracker:
     
     def get_pending_bets(self, sport: str = "NFL") -> List[TrackedBet]:
         """
-        Get all pending tracked bets
+        Get all pending tracked bets for a specific sport
         """
-        return self.db.query(TrackedBet).filter_by(result='PENDING').all()
+        query = self.db.query(TrackedBet).filter_by(result='PENDING')
+        
+        # Filter by sport if not "all"
+        if sport and sport.upper() != "ALL":
+            query = query.filter(TrackedBet.sport == sport.upper())
+            
+        return query.all()
     
     def get_recent_results(self, limit: int = 20, sport: str = "NFL") -> List[Dict]:
         """
-        Get recent bet results for display
+        Get recent bet results for display for a specific sport
         """
-        bets = self.db.query(TrackedBet).filter(
+        query = self.db.query(TrackedBet).filter(
             TrackedBet.result.in_(['WIN', 'LOSS', 'PUSH'])
-        ).order_by(TrackedBet.game_time.desc()).limit(limit).all()
+        )
+        
+        # Filter by sport if not "all"
+        if sport and sport.upper() != "ALL":
+            query = query.filter(TrackedBet.sport == sport.upper())
+            
+        bets = query.order_by(TrackedBet.game_time.desc()).limit(limit).all()
         
         results = []
         for bet in bets:

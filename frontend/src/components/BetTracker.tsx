@@ -107,7 +107,7 @@ const BetTracker: React.FC = () => {
       // Track them
       const trackResponse = await axios.post(
         `${API_URL}/api/tracking/track-current-best-bets`,
-        { games: bestBets }
+        { games: bestBets, sport: selectedSport }
       );
       
       console.log('Track response:', trackResponse.data);

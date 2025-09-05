@@ -218,7 +218,7 @@ async def track_current_best_bets(
         # Only track best bets (55% confidence or higher)
         if game.get('confidence', 0) >= 0.55:
             try:
-                bet = tracker.track_best_bet(game, game)
+                bet = tracker.track_best_bet(game, game, sport=request.sport)
                 tracked_count += 1
                 tracked_games.append(game)
                 logger.info(f"Tracked bet: {game.get('away_team')} @ {game.get('home_team')} - Confidence: {game.get('confidence', 0) * 100:.1f}%")
