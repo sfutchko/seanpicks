@@ -1,0 +1,7 @@
+VERSION: 0.1.3
+DATE: 2025-09-05
+FIXES:
+- Live scores now display correctly (away_score-home_score)
+- Parlays working without authentication
+- All authentication removed
+BACKEND: https://seanpicks-production.up.railway.app (v2.1.1)
