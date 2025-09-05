@@ -12,7 +12,7 @@ import requests
 
 from app.database.connection import get_db
 from app.models.user import User
-from app.routers.auth import get_current_user
+# Authentication removed - public access
 from app.services.confidence_calculator import ConfidenceCalculator
 from app.services.complete_analyzer import CompleteAnalyzer
 
@@ -162,7 +162,6 @@ def load_games_data() -> List[Dict[str, Any]]:
 
 @router.get("/games")
 async def get_ncaaf_games(
-    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get NCAAF games with analysis"""
@@ -367,7 +366,6 @@ async def get_ncaaf_games(
 @router.get("/games/{game_id}")
 async def get_game_details(
     game_id: str,
-    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get detailed analysis for a specific game"""

@@ -94,8 +94,14 @@ const Dashboard: React.FC = () => {
   const [dataStatus, setDataStatus] = useState<any>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [bankroll, setBankroll] = useState(1000);
-  const [unitSize, setUnitSize] = useState(20);
+  const [bankroll, setBankroll] = useState(() => {
+    const saved = localStorage.getItem('bankroll');
+    return saved ? Number(saved) : 1000;
+  });
+  const [unitSize, setUnitSize] = useState(() => {
+    const saved = localStorage.getItem('unitSize');
+    return saved ? Number(saved) : 20;
+  });
   const [liveGames, setLiveGames] = useState<any[]>([]);
   const [upcomingGames, setUpcomingGames] = useState<any[]>([]);
   const [showHelp, setShowHelp] = useState(false);
@@ -233,7 +239,7 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       await loadGames();
-      await loadUserProfile();
+      // User profile not needed
       await loadParlays();
       await loadLiveGames();
     };
@@ -248,15 +254,7 @@ const Dashboard: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sport]);
 
-  const loadUserProfile = async () => {
-    try {
-      const response = await users.getProfile();
-      setBankroll(response.data.bankroll);
-      setUnitSize(response.data.unit_size);
-    } catch (err) {
-      console.error('Error loading profile:', err);
-    }
-  };
+  // User profile not needed - using default values
 
   const loadGames = async () => {
     setLoading(true);
@@ -390,19 +388,14 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    window.location.href = '/login';
-  };
+  // Removed logout functionality - no authentication needed
 
-  const updateBankroll = async (newBankroll: number) => {
-    try {
-      await users.updateBankroll(newBankroll);
-      setBankroll(newBankroll);
-      setUnitSize(newBankroll * 0.02);
-    } catch (err) {
-      console.error('Error updating bankroll:', err);
-    }
+  const updateBankroll = (newBankroll: number) => {
+    setBankroll(newBankroll);
+    setUnitSize(newBankroll * 0.02);
+    // Store locally since no authentication
+    localStorage.setItem('bankroll', newBankroll.toString());
+    localStorage.setItem('unitSize', (newBankroll * 0.02).toString());
   };
 
   const getConfidenceColor = (confidence: number) => {
@@ -549,9 +542,6 @@ const Dashboard: React.FC = () => {
             </button>
             <button onClick={() => setShowHelp(true)} className="help-btn">
               ❓ Help
-            </button>
-            <button onClick={handleLogout} className="logout-btn">
-              Logout
             </button>
           </div>
         </div>

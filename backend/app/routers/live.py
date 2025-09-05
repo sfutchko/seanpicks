@@ -10,7 +10,7 @@ import requests
 
 from app.database.connection import get_db
 from app.models.user import User
-from app.routers.auth import get_current_user
+# Authentication removed - public access
 
 router = APIRouter()
 
@@ -20,7 +20,6 @@ ODDS_API_BASE = "https://api.the-odds-api.com/v4"
 @router.get("/games")
 async def get_live_games(
     sport: str = "nfl",
-    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get live/in-play games with current odds"""
@@ -199,7 +198,6 @@ def detect_line_movement(game: Dict) -> Dict:
 
 @router.get("/alerts")
 async def get_betting_alerts(
-    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get real-time betting alerts for line movements and opportunities"""

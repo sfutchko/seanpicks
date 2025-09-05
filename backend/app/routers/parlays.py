@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 from app.models.user import User
-from app.routers.auth import get_current_user
+# Authentication removed - public access
 from app.routers.nfl import load_games_data as load_nfl_games
 from app.routers.ncaaf import load_games_data as load_ncaaf_games
 from app.services.confidence_calculator import ConfidenceCalculator
@@ -40,7 +40,6 @@ def calculate_parlay_multiplier(num_legs: int) -> float:
 @router.get("/recommendations")
 async def get_parlay_recommendations(
     sport: str = "all",
-    current_user: User = Depends(get_current_user)
 ):
     """Get optimized parlay recommendations"""
     
@@ -180,7 +179,6 @@ async def get_parlay_recommendations(
 @router.post("/calculate")
 async def calculate_parlay(
     parlay: ParlayRequest,
-    current_user: User = Depends(get_current_user)
 ):
     """Calculate parlay odds and expected value"""
     

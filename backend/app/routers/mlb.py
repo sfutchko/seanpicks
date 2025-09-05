@@ -12,7 +12,7 @@ import logging
 
 from app.database.connection import get_db
 from app.models.user import User
-from app.routers.auth import get_current_user
+# Authentication removed - public access
 from app.services.mlb_analyzer import MLBCompleteAnalyzer
 from app.services.mlb_data_aggregator import MLBDataAggregator
 
@@ -31,7 +31,6 @@ mlb_aggregator = MLBDataAggregator()
 
 @router.get("/games")
 async def get_mlb_games(
-    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -316,7 +315,6 @@ async def get_mlb_games(
 @router.get("/games/{game_id}")
 async def get_mlb_game_details(
     game_id: str,
-    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -376,7 +374,6 @@ async def get_mlb_game_details(
 
 @router.get("/standings")
 async def get_mlb_standings(
-    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
