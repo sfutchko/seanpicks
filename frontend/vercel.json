@@ -7,5 +7,10 @@
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ]
+  ],
+  "build": {
+    "env": {
+      "FORCE_REBUILD": "2025-09-05-v2"
+    }
+  }
 }
