@@ -18,5 +18,12 @@ COPY backend/data/*.db data/ 2>/dev/null || :
 ENV PYTHONUNBUFFERED=1
 ENV PORT=8000
 
+# Copy admin creation script
+COPY backend/create_admin.py .
+
+# Create startup script
+RUN echo '#!/bin/bash\npython create_admin.py\nuvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}' > /app/start.sh && \
+    chmod +x /app/start.sh
+
 # Run the application
-CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
+CMD ["/app/start.sh"]
