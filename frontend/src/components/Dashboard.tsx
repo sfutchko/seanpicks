@@ -800,7 +800,7 @@ const Dashboard: React.FC = () => {
                         {game.away_team} @ {game.home_team}
                       </div>
                       <div className="info-item-details">
-                        <span className="live-score">{game.score || '0-0'}</span>
+                        <span className="live-score">{game.away_score || '0'}-{game.home_score || '0'}</span>
                         <span className="live-quarter">{game.quarter || 'Q1'}</span>
                       </div>
                     </div>

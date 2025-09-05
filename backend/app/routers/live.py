@@ -45,6 +45,27 @@ async def get_live_games(
         
         response = requests.get(url, params=params, timeout=10)
         
+        # Also fetch scores for live games
+        scores_url = f"{ODDS_API_BASE}/sports/{sport_key}/scores"
+        scores_params = {
+            'apiKey': ODDS_API_KEY,
+            'daysFrom': '1'  # Get scores from last 24 hours
+        }
+        scores_response = requests.get(scores_url, params=scores_params, timeout=10)
+        
+        # Build scores lookup dictionary
+        scores_data = {}
+        if scores_response.status_code == 200:
+            for game_score in scores_response.json():
+                game_id = game_score.get('id')
+                scores = game_score.get('scores', [])
+                if scores and len(scores) >= 2:
+                    scores_data[game_id] = {
+                        'home_score': scores[0].get('score', '0'),
+                        'away_score': scores[1].get('score', '0'),
+                        'completed': game_score.get('completed', False)
+                    }
+        
         if response.status_code == 200:
             all_games = response.json()
             
@@ -56,7 +77,17 @@ async def get_live_games(
             upcoming_games = []
             
             for game in all_games:
+                game_id = game.get('id')
                 game_time_str = game.get('commence_time', '')
+                
+                # Add scores if available
+                if game_id in scores_data:
+                    game['home_score'] = scores_data[game_id]['home_score']
+                    game['away_score'] = scores_data[game_id]['away_score']
+                else:
+                    game['home_score'] = '0'
+                    game['away_score'] = '0'
+                
                 if game_time_str:
                     game_time = datetime.fromisoformat(game_time_str.replace('Z', '+00:00'))
                     
@@ -180,6 +211,8 @@ def format_live_game(game: Dict) -> Dict:
     return {
         "home_team": home_team,
         "away_team": away_team,
+        "home_score": game.get('home_score', '0'),
+        "away_score": game.get('away_score', '0'),
         "game_time": game.get('commence_time'),
         "status": game.get('status', 'upcoming'),
         "quarter": game.get('quarter', ''),
