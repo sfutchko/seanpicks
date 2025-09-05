@@ -117,5 +117,17 @@ async def health_check():
         "status": "healthy",
         "api": "operational",
         "database": "connected",
-        "version": "2.0.0"
+        "version": "2.1.0",
+        "auth_required": False,
+        "public_access": True,
+        "deployed_at": "2025-09-05"
+    }
+
+@app.get("/test-public")
+async def test_public():
+    """Test endpoint - no auth required"""
+    return {
+        "message": "This is a public endpoint - no authentication required!",
+        "version": "2.1.0",
+        "auth": "DISABLED"
     }
