@@ -1,5 +1,5 @@
 """
-Parlay optimization router
+Parlay optimization router with intelligent parlay building
 """
 
 from fastapi import APIRouter, Depends
@@ -12,9 +12,12 @@ from app.routers.ncaaf import load_games_data as load_ncaaf_games
 from app.services.confidence_calculator import ConfidenceCalculator
 from app.services.mlb_data_aggregator import MLBDataAggregator
 from app.services.mlb_analyzer import MLBCompleteAnalyzer
+from app.services.intelligent_parlay_builder import IntelligentParlayBuilder
 import itertools
+import logging
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 class ParlayLeg(BaseModel):
     game_id: str
@@ -30,59 +33,63 @@ def calculate_parlay_multiplier(num_legs: int) -> float:
     """Calculate realistic parlay multipliers for -110 odds"""
     multipliers = {
         2: 2.64,   # $100 bet returns $264
-        3: 6.96,   # $100 bet returns $696
-        4: 13.28,  # $100 bet returns $1328
-        5: 25.63,  # $100 bet returns $2563
-        6: 49.64   # $100 bet returns $4964
+        3: 5.96,   # $100 bet returns $596 (corrected from 6.96)
+        4: 12.28,  # $100 bet returns $1228 (corrected from 13.28)
+        5: 24.36,  # $100 bet returns $2436 (corrected from 25.63)
+        6: 47.41   # $100 bet returns $4741 (corrected from 49.64)
     }
-    return multipliers.get(num_legs, 2.64 ** num_legs)
+    return multipliers.get(num_legs, 2.64 ** (num_legs * 0.91))  # Adjusted formula
 
 @router.get("/recommendations")
 async def get_parlay_recommendations(
     sport: str = "all",
 ):
-    """Get optimized parlay recommendations"""
+    """Get optimized parlay recommendations using intelligent builder"""
     
     calculator = ConfidenceCalculator()
+    parlay_builder = IntelligentParlayBuilder()
     all_games = []
     
-    # Try to load NFL games, but don't fail if not available
+    # Try to load NFL games
     if sport in ["all", "nfl"]:
         try:
             nfl_games = load_nfl_games()
             for idx, game in enumerate(nfl_games):
-                confidence = calculator.calculate_confidence(
-                    sharp_action=game.get("sharp_action", False),
-                    reverse_line_movement=game.get("reverse_line_movement", False),
-                    steam_move=game.get("steam_move", False),
-                    public_fade=game.get("contrarian", False),
-                    key_number_edge=abs(game.get("spread", 0)) in [3, 7, 10]
-                )
-                game['confidence'] = confidence
-                game['sport'] = 'NFL'
-                game['id'] = f'nfl_{idx}'
-                all_games.append(game)
+                # Add pick to game data
+                if 'pick' in game and game['pick']:
+                    confidence = calculator.calculate_confidence(
+                        sharp_action=game.get("sharp_action", False),
+                        reverse_line_movement=game.get("reverse_line_movement", False),
+                        steam_move=game.get("steam_move", False),
+                        public_fade=game.get("contrarian", False),
+                        key_number_edge=abs(game.get("spread", 0)) in [3, 7, 10]
+                    )
+                    game['confidence'] = confidence
+                    game['sport'] = 'NFL'
+                    game['id'] = f'nfl_{idx}'
+                    all_games.append(game)
         except Exception as e:
-            print(f"Failed to load NFL games: {e}")
+            logger.error(f"Failed to load NFL games: {e}")
     
     # Load NCAAF games
     if sport in ["all", "ncaaf"]:
         try:
             ncaaf_games = load_ncaaf_games()
             for idx, game in enumerate(ncaaf_games):
-                confidence = calculator.calculate_confidence(
-                    sharp_action=game.get("sharp_action", False),
-                    reverse_line_movement=game.get("reverse_line_movement", False),
-                    steam_move=game.get("steam_move", False),
-                    public_fade=game.get("contrarian", False),
-                    key_number_edge=abs(game.get("spread", 0)) in [3, 7, 10, 14]
-                )
-                game['confidence'] = confidence
-                game['sport'] = 'NCAAF'
-                game['id'] = f'ncaaf_{idx}'
-                all_games.append(game)
+                if 'pick' in game and game['pick']:
+                    confidence = calculator.calculate_confidence(
+                        sharp_action=game.get("sharp_action", False),
+                        reverse_line_movement=game.get("reverse_line_movement", False),
+                        steam_move=game.get("steam_move", False),
+                        public_fade=game.get("contrarian", False),
+                        key_number_edge=abs(game.get("spread", 0)) in [3, 7, 10, 14]
+                    )
+                    game['confidence'] = confidence
+                    game['sport'] = 'NCAAF'
+                    game['id'] = f'ncaaf_{idx}'
+                    all_games.append(game)
         except Exception as e:
-            print(f"Failed to load NCAAF games: {e}")
+            logger.error(f"Failed to load NCAAF games: {e}")
     
     # Load MLB games
     if sport in ["all", "mlb"]:
@@ -95,92 +102,51 @@ async def get_parlay_recommendations(
                 # Analyze the game
                 analysis = mlb_analyzer.analyze_game(game_raw)
                 
-                # Convert to parlay format
-                game = {
-                    'home_team': analysis['home_team'],
-                    'away_team': analysis['away_team'],
-                    'game_time': analysis['game_time'],
-                    'spread': analysis.get('spread', 1.5),
-                    'total': analysis.get('total', 8.5),
-                    'pick': analysis['pick'],
-                    'confidence': analysis['confidence'],
-                    'sport': 'MLB',
-                    'id': f'mlb_{idx}',
-                    'sharp_action': analysis['confidence'] >= 0.52,
-                    'venue': analysis.get('venue', '')
-                }
-                all_games.append(game)
-        except Exception as e:
-            print(f"Failed to load MLB games: {e}")
-    
-    # Filter high confidence games (lowered threshold for more parlays)
-    high_conf_games = [g for g in all_games if g['confidence'] >= 0.53]
-    high_conf_games.sort(key=lambda x: x['confidence'], reverse=True)
-    
-    parlays = []
-    
-    # Generate 2-team parlays
-    for combo in itertools.combinations(high_conf_games[:6], 2):
-        avg_confidence = sum(g['confidence'] for g in combo) / 2
-        
-        parlay = {
-            "id": f"parlay_2_{len(parlays)}",
-            "type": "2-team",
-            "games": [
-                {
-                    "team": combo[0].get('home_team', 'Home'),
-                    "spread": combo[0].get('spread', 0),
-                    "sport": combo[0]['sport'],
-                    "confidence": round(combo[0]['confidence'], 3)
-                },
-                {
-                    "team": combo[1].get('home_team', 'Home'),
-                    "spread": combo[1].get('spread', 0),
-                    "sport": combo[1]['sport'],
-                    "confidence": round(combo[1]['confidence'], 3)
-                }
-            ],
-            "combined_confidence": round(avg_confidence, 3),
-            "multiplier": 2.64,
-            "potential_payout": round(2.64 * 20, 2),  # $20 bet
-            "expected_value": round((avg_confidence ** 2) * 2.64 * 20 - 20, 2)
-        }
-        parlays.append(parlay)
-    
-    # Generate 3-team parlays (higher threshold)
-    for combo in itertools.combinations(high_conf_games[:5], 3):
-        avg_confidence = sum(g['confidence'] for g in combo) / 3
-        
-        if avg_confidence >= 0.53:
-            parlay = {
-                "id": f"parlay_3_{len(parlays)}",
-                "type": "3-team",
-                "games": [
-                    {
-                        "team": g.get('home_team', 'Home'),
-                        "spread": g.get('spread', 0),
-                        "sport": g['sport'],
-                        "confidence": round(g['confidence'], 3)
+                if 'pick' in analysis and analysis['pick']:
+                    # Convert to parlay format
+                    game = {
+                        'home_team': analysis['home_team'],
+                        'away_team': analysis['away_team'],
+                        'game_time': analysis['game_time'],
+                        'spread': analysis.get('spread', 1.5),
+                        'total': analysis.get('total', 8.5),
+                        'pick': analysis['pick'],
+                        'confidence': analysis['confidence'],
+                        'sport': 'MLB',
+                        'id': f'mlb_{idx}',
+                        'sharp_action': analysis['confidence'] >= 0.52,
+                        'venue': analysis.get('venue', ''),
+                        'weather': analysis.get('weather')
                     }
-                    for g in combo
-                ],
-                "combined_confidence": round(avg_confidence, 3),
-                "multiplier": 6.96,
-                "potential_payout": round(6.96 * 20, 2),  # $20 bet
-                "expected_value": round((avg_confidence ** 3) * 6.96 * 20 - 20, 2)
-            }
-            parlays.append(parlay)
+                    all_games.append(game)
+        except Exception as e:
+            logger.error(f"Failed to load MLB games: {e}")
     
-    # Sort by expected value
-    parlays.sort(key=lambda x: x['expected_value'], reverse=True)
+    # Build intelligent parlays
+    parlay_results = parlay_builder.build_parlays(all_games)
     
-    # Get best parlay
-    best_parlay = parlays[0] if parlays else None
+    # Format for frontend compatibility
+    formatted_parlays = []
+    for parlay in parlay_results.get('parlays', []):
+        formatted = {
+            "id": parlay['id'],
+            "type": parlay['type'],
+            "legs": parlay.get('legs', len(parlay.get('games', []))),
+            "games": parlay.get('games', []),
+            "confidence": parlay.get('confidence', 0) / 100.0,  # Convert back to decimal
+            "combined_confidence": parlay.get('combined_confidence', 0),
+            "multiplier": parlay['multiplier'],
+            "potential_payout": parlay['potential_payout'],
+            "expected_value": parlay['expected_value'],
+            "recommendation": parlay.get('recommendation', '')
+        }
+        formatted_parlays.append(formatted)
     
     return {
         "sport": sport,
-        "parlays": parlays[:10],
-        "best_parlay": best_parlay,
+        "parlays": formatted_parlays,
+        "best_parlay": parlay_results.get('best_parlay'),
+        "analysis": parlay_results.get('analysis'),
         "suggested_bet": 20,  # 2% of $1000 bankroll
         "bankroll": 1000  # Default bankroll
     }
@@ -198,6 +164,12 @@ async def calculate_parlay(
             "error": "Parlay must have at least 2 legs"
         }
     
+    if num_legs > 4:
+        return {
+            "error": "Parlays with more than 4 legs are not recommended",
+            "reason": "Win probability becomes extremely low"
+        }
+    
     # Calculate combined probability
     combined_prob = 1.0
     for leg in parlay.legs:
@@ -210,19 +182,34 @@ async def calculate_parlay(
     potential_payout = parlay.bet_amount * multiplier
     expected_value = (combined_prob * potential_payout) - parlay.bet_amount
     
+    # Break-even probability
+    breakeven_prob = 1 / multiplier
+    
     # Determine recommendation
-    if expected_value > 0:
-        recommendation = "Positive EV - Good bet"
-    elif expected_value > -parlay.bet_amount * 0.1:
-        recommendation = "Slightly negative EV - Proceed with caution"
+    if expected_value > parlay.bet_amount * 0.1:
+        recommendation = "STRONG BET - Significant positive EV"
+    elif expected_value > 0:
+        recommendation = "GOOD BET - Positive expected value"
+    elif expected_value > -parlay.bet_amount * 0.05:
+        recommendation = "NEUTRAL - Near breakeven"
+    elif expected_value > -parlay.bet_amount * 0.15:
+        recommendation = "RISKY - Slightly negative EV"
     else:
-        recommendation = "Negative EV - Not recommended"
+        recommendation = "AVOID - Strong negative EV"
+    
+    # Add advice based on number of legs
+    if num_legs > 3:
+        recommendation += " | Consider reducing to 2-3 legs for better odds"
     
     return {
         "num_legs": num_legs,
         "probability": round(combined_prob * 100, 2),
         "payout": round(potential_payout, 2),
+        "profit": round(potential_payout - parlay.bet_amount, 2),
         "expected_value": round(expected_value, 2),
         "recommendation": recommendation,
-        "break_even_prob": round((1 / multiplier) * 100, 2)
+        "break_even_prob": round(breakeven_prob * 100, 2),
+        "your_prob": round(combined_prob * 100, 2),
+        "edge": round((combined_prob - breakeven_prob) * 100, 2),
+        "optimal_bet": min(parlay.bet_amount, round(max(0, expected_value * 2), 2))
     }
