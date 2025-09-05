@@ -204,6 +204,25 @@ body {
   box-shadow: 0 10px 25px rgba(220, 38, 38, 0.4);
 }
 
+.help-btn {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  border: none;
+  color: white;
+  padding: 0.75rem 1.75rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-right: 0.5rem;
+}
+
+.help-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4);
+}
+
 .tracker-btn {
   background: linear-gradient(135deg, #00ff88, #00cc70);
   border: none;

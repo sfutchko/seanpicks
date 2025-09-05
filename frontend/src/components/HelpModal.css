@@ -1,0 +1,166 @@
+.help-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 1rem;
+}
+
+.help-modal-content {
+  background: linear-gradient(135deg, #1a1f2e, #0f1419);
+  border: 2px solid var(--primary-green);
+  border-radius: 16px;
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.help-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 204, 255, 0.1));
+}
+
+.help-modal-header h2 {
+  color: var(--primary-green);
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.help-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: 2rem;
+  cursor: pointer;
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.help-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--primary-green);
+}
+
+.help-modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.help-section {
+  margin-bottom: 2rem;
+}
+
+.help-section h3 {
+  color: var(--primary-green);
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+}
+
+.help-section dl {
+  margin: 0;
+}
+
+.help-section dt {
+  color: var(--accent-blue);
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.05rem;
+}
+
+.help-section dd {
+  color: var(--text-secondary);
+  margin-left: 1.5rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+.help-section p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 1rem 0;
+}
+
+.help-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+}
+
+.help-section ul li {
+  color: var(--text-secondary);
+  padding: 0.5rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+  line-height: 1.6;
+}
+
+.help-section ul li:before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  color: var(--primary-green);
+  font-weight: bold;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .help-modal-content {
+    max-height: 100vh;
+    height: 100vh;
+    max-width: 100%;
+    border-radius: 0;
+  }
+  
+  .help-modal-overlay {
+    padding: 0;
+  }
+  
+  .help-modal-header {
+    padding: 1rem;
+  }
+  
+  .help-modal-header h2 {
+    font-size: 1.5rem;
+  }
+  
+  .help-modal-body {
+    padding: 1rem;
+  }
+  
+  .help-section h3 {
+    font-size: 1.1rem;
+  }
+  
+  .help-section dt {
+    font-size: 1rem;
+  }
+  
+  .help-section dd {
+    margin-left: 1rem;
+    font-size: 0.9rem;
+  }
+}

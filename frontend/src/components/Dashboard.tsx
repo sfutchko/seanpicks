@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { nfl, ncaaf, mlb, parlays, users, live } from '../services/api';
 import './Dashboard.css';
 import './BestBets.css';
+import HelpModal from './HelpModal';
 
 interface Weather {
   temperature?: number;
@@ -97,6 +98,14 @@ const Dashboard: React.FC = () => {
   const [unitSize, setUnitSize] = useState(20);
   const [liveGames, setLiveGames] = useState<any[]>([]);
   const [upcomingGames, setUpcomingGames] = useState<any[]>([]);
+  const [showHelp, setShowHelp] = useState(false);
+
+  // Helper function to format spread to standard betting line (whole or .5)
+  const formatSpread = (spread: number): string => {
+    // Round to nearest 0.5
+    const rounded = Math.round(spread * 2) / 2;
+    return rounded > 0 ? `+${rounded}` : `${rounded}`;
+  };
 
   // Stats calculations
   const totalGames = games.length;
@@ -538,6 +547,9 @@ const Dashboard: React.FC = () => {
             <button onClick={() => navigate('/tracker')} className="tracker-btn">
               📊 Performance
             </button>
+            <button onClick={() => setShowHelp(true)} className="help-btn">
+              ❓ Help
+            </button>
             <button onClick={handleLogout} className="logout-btn">
               Logout
             </button>
@@ -653,8 +665,18 @@ const Dashboard: React.FC = () => {
                       
                       <div className="bet-odds-info">
                         <div className="odds-row">
-                          <span className="odds-label">Line:</span>
-                          <span className="odds-value">{game.spread > 0 ? '+' : ''}{game.spread}</span>
+                          <span className="odds-label">Spread:</span>
+                          <span className="odds-value">{formatSpread(game.spread)}</span>
+                        </div>
+                        <div className="odds-row">
+                          <span className="odds-label">ML:</span>
+                          <span className="odds-value">
+                            {game.moneylines?.home || game.moneylines?.away ? 
+                              (game.spread < 0 ? 
+                                (game.moneylines?.home || '-150') : 
+                                (game.moneylines?.away || '+130')) 
+                              : 'N/A'}
+                          </span>
                         </div>
                         <div className="odds-row">
                           <span className="odds-label">O/U:</span>
@@ -1059,6 +1081,9 @@ const Dashboard: React.FC = () => {
           </main>
         </div>
       </div>
+      
+      {/* Help Modal */}
+      <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
   );
 };
 
