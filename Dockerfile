@@ -15,8 +15,9 @@ ENV PORT=8000
 
 # Admin creation script already copied with backend/
 
-# Force rebuild - Version 2.1.0 - No authentication required
-RUN echo '#!/bin/bash\necho "Starting Sean Picks API v2.1.0 - Public Access"\npython create_admin.py\nuvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}' > /app/start.sh && \
+# Force rebuild - Version 2.1.1 - CRITICAL FIX - No authentication required
+# Rebuild triggered: 2025-09-05 01:40
+RUN echo '#!/bin/bash\necho "Starting Sean Picks API v2.1.1 - Public Access - Fixed"\npython create_admin.py\nuvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}' > /app/start.sh && \
     chmod +x /app/start.sh
 
 # Run the application

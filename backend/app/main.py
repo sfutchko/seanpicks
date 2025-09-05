@@ -57,7 +57,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Sean Picks API - Public Access",
     description="Professional Sports Betting Analysis Platform - No Login Required",
-    version="2.1.0",
+    version="2.1.1",
     lifespan=lifespan
 )
 
@@ -117,7 +117,7 @@ async def health_check():
         "status": "healthy",
         "api": "operational",
         "database": "connected",
-        "version": "2.1.0",
+        "version": "2.1.1",
         "auth_required": False,
         "public_access": True,
         "deployed_at": "2025-09-05"
@@ -128,6 +128,6 @@ async def test_public():
     """Test endpoint - no auth required"""
     return {
         "message": "This is a public endpoint - no authentication required!",
-        "version": "2.1.0",
+        "version": "2.1.1",
         "auth": "DISABLED"
     }
