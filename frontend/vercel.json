@@ -10,7 +10,7 @@
   ],
   "build": {
     "env": {
-      "FORCE_REBUILD": "2025-09-05-v2"
+      "FORCE_REBUILD": "2025-09-05-v3-scores-fix"
     }
   }
 }

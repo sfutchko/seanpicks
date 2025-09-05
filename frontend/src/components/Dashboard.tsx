@@ -377,6 +377,7 @@ const Dashboard: React.FC = () => {
         const liveData = response.data.live_games || [];
         const upcomingData = response.data.upcoming_games || [];
         console.log(`Setting ${liveData.length} live games`);
+        console.log('First live game data:', liveData[0]);
         console.log(`Setting ${upcomingData.length} upcoming games`);
         setLiveGames(liveData);
         setUpcomingGames(upcomingData);
