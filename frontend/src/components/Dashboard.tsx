@@ -794,17 +794,20 @@ const Dashboard: React.FC = () => {
               </div>
               <div className="info-panel-content">
                 {liveGames.length > 0 ? (
-                  liveGames.slice(0, 3).map((game) => (
-                    <div key={game.id} className="info-item">
-                      <div className="info-item-game">
-                        {game.away_team} @ {game.home_team}
+                  liveGames.slice(0, 3).map((game) => {
+                    console.log('Rendering live game:', game);
+                    return (
+                      <div key={game.id} className="info-item">
+                        <div className="info-item-game">
+                          {game.away_team} @ {game.home_team}
+                        </div>
+                        <div className="info-item-details">
+                          <span className="live-score">{game.away_score || '0'}-{game.home_score || '0'}</span>
+                          <span className="live-quarter">{game.quarter || 'Q1'}</span>
+                        </div>
                       </div>
-                      <div className="info-item-details">
-                        <span className="live-score">{game.away_score || '0'}-{game.home_score || '0'}</span>
-                        <span className="live-quarter">{game.quarter || 'Q1'}</span>
-                      </div>
-                    </div>
-                  ))
+                    );
+                  })
                 ) : (
                   <div className="no-data-message">No live games</div>
                 )}
