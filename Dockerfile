@@ -13,11 +13,10 @@ COPY backend/ .
 ENV PYTHONUNBUFFERED=1
 ENV PORT=8000
 
-# Copy admin creation script
-COPY backend/create_admin.py .
+# Admin creation script already copied with backend/
 
-# Create startup script
-RUN echo '#!/bin/bash\npython create_admin.py\nuvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}' > /app/start.sh && \
+# Force rebuild - Version 2.1.0 - No authentication required
+RUN echo '#!/bin/bash\necho "Starting Sean Picks API v2.1.0 - Public Access"\npython create_admin.py\nuvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}' > /app/start.sh && \
     chmod +x /app/start.sh
 
 # Run the application
