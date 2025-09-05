@@ -55,9 +55,9 @@ async def lifespan(app: FastAPI):
 
 # Create FastAPI app
 app = FastAPI(
-    title="Sean Picks API",
-    description="Professional Sports Betting Analysis Platform",
-    version="2.0.0",
+    title="Sean Picks API - Public Access",
+    description="Professional Sports Betting Analysis Platform - No Login Required",
+    version="2.1.0",
     lifespan=lifespan
 )
 
