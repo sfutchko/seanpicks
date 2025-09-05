@@ -6,13 +6,8 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy backend code and data
+# Copy backend code
 COPY backend/ .
-
-# Create data directory and copy data files
-RUN mkdir -p data
-COPY backend/data/*.json data/ 2>/dev/null || :
-COPY backend/data/*.db data/ 2>/dev/null || :
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
