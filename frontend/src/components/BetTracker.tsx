@@ -295,43 +295,51 @@ const BetTracker: React.FC = () => {
 
       {activeTab === 'results' && (
         <div className="results-section">
-          <table className="results-table">
-            <thead>
-              <tr>
-                <th>Game</th>
-                <th>Pick</th>
-                <th>Spread</th>
-                <th>Confidence</th>
-                <th>Result</th>
-                <th>Score</th>
-                <th>Cover</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentResults.map((bet, index) => (
-                <tr key={index} className={`result-${bet.result.toLowerCase()}`}>
-                  <td>
-                    <span style={{ marginRight: '8px' }}>
-                      {bet.sport === 'nfl' && '🏈'}
-                      {bet.sport === 'ncaaf' && '🎓'}
-                      {bet.sport === 'mlb' && '⚾'}
-                    </span>
-                    {bet.game}
-                  </td>
-                  <td>{bet.pick}</td>
-                  <td>{bet.spread > 0 ? '+' : ''}{bet.spread}</td>
-                  <td>{bet.confidence}%</td>
-                  <td>
-                    <span style={{ color: getResultColor(bet.result), fontWeight: 'bold' }}>
-                      {bet.result}
-                    </span>
-                  </td>
-                  <td>{bet.score}</td>
-                  <td>{bet.actual_spread ? `${bet.actual_spread > 0 ? '+' : ''}${bet.actual_spread}` : '-'}</td>
+          {recentResults.length > 0 ? (
+            <table className="results-table">
+              <thead>
+                <tr>
+                  <th>Game</th>
+                  <th>Pick</th>
+                  <th>Spread</th>
+                  <th>Confidence</th>
+                  <th>Result</th>
+                  <th>Score</th>
+                  <th>Cover</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {recentResults.map((bet, index) => (
+                  <tr key={index} className={`result-${bet.result.toLowerCase()}`}>
+                    <td>
+                      <span style={{ marginRight: '8px' }}>
+                        {bet.sport === 'nfl' && '🏈'}
+                        {bet.sport === 'ncaaf' && '🎓'}
+                        {bet.sport === 'mlb' && '⚾'}
+                      </span>
+                      {bet.game}
+                    </td>
+                    <td>{bet.pick}</td>
+                    <td>{bet.spread > 0 ? '+' : ''}{bet.spread}</td>
+                    <td>{bet.confidence}%</td>
+                    <td>
+                      <span style={{ color: getResultColor(bet.result), fontWeight: 'bold' }}>
+                        {bet.result}
+                      </span>
+                    </td>
+                    <td>{bet.score}</td>
+                    <td>{bet.actual_spread ? `${bet.actual_spread > 0 ? '+' : ''}${bet.actual_spread}` : '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '40px', color: '#999' }}>
+              <h3>No Tracked Bets Yet</h3>
+              <p>Track some best bets first, then check back after games complete to see your results!</p>
+              <p style={{ marginTop: '20px' }}>Use the "Track Current {selectedSport} Best Bets" button above to start tracking.</p>
+            </div>
+          )}
         </div>
       )}
 
