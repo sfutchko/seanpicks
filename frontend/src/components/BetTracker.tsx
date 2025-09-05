@@ -47,27 +47,23 @@ const BetTracker: React.FC = () => {
 
   const fetchData = async () => {
     setLoading(true);
-    const token = localStorage.getItem('token');
     
     try {
       // Fetch performance stats
       const perfResponse = await axios.get(
-        `${API_URL}/api/tracking/performance?days=${timeframe}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `${API_URL}/api/tracking/performance?days=${timeframe}`
       );
       setPerformance(perfResponse.data);
 
       // Fetch recent results
       const resultsResponse = await axios.get(
-        `${API_URL}/api/tracking/results`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `${API_URL}/api/tracking/results`
       );
       setRecentResults(resultsResponse.data);
 
       // Fetch pending bets
       const pendingResponse = await axios.get(
-        `${API_URL}/api/tracking/pending`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `${API_URL}/api/tracking/pending`
       );
       setPendingBets(pendingResponse.data);
     } catch (error) {
@@ -78,16 +74,13 @@ const BetTracker: React.FC = () => {
   };
 
   const trackCurrentBets = async () => {
-    const token = localStorage.getItem('token');
-    
     try {
       // Get current best bets based on selected sport
       let endpoint = '/api/nfl/games';
       if (selectedSport === 'NCAAF') endpoint = '/api/ncaaf/games';
       else if (selectedSport === 'MLB') endpoint = '/api/mlb/games';
       const gamesResponse = await axios.get(
-        `${API_URL}${endpoint}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `${API_URL}${endpoint}`
       );
       
       console.log(`${selectedSport} games response:`, gamesResponse.data);
@@ -111,8 +104,7 @@ const BetTracker: React.FC = () => {
       // Track them
       const trackResponse = await axios.post(
         `${API_URL}/api/tracking/track-current-best-bets`,
-        { games: bestBets },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { games: bestBets }
       );
       
       console.log('Track response:', trackResponse.data);
@@ -127,8 +119,6 @@ const BetTracker: React.FC = () => {
   };
 
   const updateScores = async () => {
-    const token = localStorage.getItem('token');
-    
     try {
       // Update scores for the selected sport
       let sportParam = 'americanfootball_nfl';
@@ -136,8 +126,7 @@ const BetTracker: React.FC = () => {
       else if (selectedSport === 'MLB') sportParam = 'baseball_mlb';
       const response = await axios.post(
         `${API_URL}/api/tracking/update-scores?sport=${sportParam}`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
+        {}
       );
       
       const data = response.data;
