@@ -1,7 +1,12 @@
 import React from 'react';
 import './HelpModal.css';
 
-const HelpModal = ({ isOpen, onClose }) => {
+interface HelpModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
