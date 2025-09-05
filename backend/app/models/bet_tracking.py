@@ -52,6 +52,9 @@ class TrackedBet(Base):
     public_percentage = Column(Float)
     sharp_action = Column(Boolean)
     weather = Column(JSON)
+    
+    # Sport tracking
+    sport = Column(String, default="NFL")
 
 
 class BetSnapshot(Base):

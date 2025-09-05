@@ -77,6 +77,7 @@ class BetTracker:
                 public_percentage=analysis.get('public_percentage'),
                 sharp_action=analysis.get('sharp_action'),
                 weather=game.get('weather'),
+                sport=sport,
                 result='PENDING'
             )
             self.db.add(bet)
@@ -235,11 +236,17 @@ class BetTracker:
         """
         cutoff_date = datetime.utcnow() - timedelta(days=days)
         
-        # Query completed bets
-        bets = self.db.query(TrackedBet).filter(
+        # Query completed bets for specific sport
+        query = self.db.query(TrackedBet).filter(
             TrackedBet.first_seen >= cutoff_date,
             TrackedBet.result.in_(['WIN', 'LOSS', 'PUSH'])
-        ).all()
+        )
+        
+        # Filter by sport if not "all"
+        if sport and sport.upper() != "ALL":
+            query = query.filter(TrackedBet.sport == sport.upper())
+            
+        bets = query.all()
         
         if not bets:
             return {
@@ -288,17 +295,29 @@ class BetTracker:
     
     def get_pending_bets(self, sport: str = "NFL") -> List[TrackedBet]:
         """
-        Get all pending tracked bets
+        Get all pending tracked bets for a specific sport
         """
-        return self.db.query(TrackedBet).filter_by(result='PENDING').all()
+        query = self.db.query(TrackedBet).filter_by(result='PENDING')
+        
+        # Filter by sport if not "all"
+        if sport and sport.upper() != "ALL":
+            query = query.filter(TrackedBet.sport == sport.upper())
+            
+        return query.all()
     
     def get_recent_results(self, limit: int = 20, sport: str = "NFL") -> List[Dict]:
         """
-        Get recent bet results for display
+        Get recent bet results for display for a specific sport
         """
-        bets = self.db.query(TrackedBet).filter(
+        query = self.db.query(TrackedBet).filter(
             TrackedBet.result.in_(['WIN', 'LOSS', 'PUSH'])
-        ).order_by(TrackedBet.game_time.desc()).limit(limit).all()
+        )
+        
+        # Filter by sport if not "all"
+        if sport and sport.upper() != "ALL":
+            query = query.filter(TrackedBet.sport == sport.upper())
+            
+        bets = query.order_by(TrackedBet.game_time.desc()).limit(limit).all()
         
         results = []
         for bet in bets:
