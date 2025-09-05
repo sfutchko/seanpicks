@@ -46,63 +46,72 @@ async def get_parlay_recommendations(
     calculator = ConfidenceCalculator()
     all_games = []
     
-    # Load NFL games
+    # Try to load NFL games, but don't fail if not available
     if sport in ["all", "nfl"]:
-        nfl_games = load_nfl_games()
-        for idx, game in enumerate(nfl_games):
-            confidence = calculator.calculate_confidence(
-                sharp_action=game.get("sharp_action", False),
-                reverse_line_movement=game.get("reverse_line_movement", False),
-                steam_move=game.get("steam_move", False),
-                public_fade=game.get("contrarian", False),
-                key_number_edge=abs(game.get("spread", 0)) in [3, 7, 10]
-            )
-            game['confidence'] = confidence
-            game['sport'] = 'NFL'
-            game['id'] = f'nfl_{idx}'
-            all_games.append(game)
+        try:
+            nfl_games = load_nfl_games()
+            for idx, game in enumerate(nfl_games):
+                confidence = calculator.calculate_confidence(
+                    sharp_action=game.get("sharp_action", False),
+                    reverse_line_movement=game.get("reverse_line_movement", False),
+                    steam_move=game.get("steam_move", False),
+                    public_fade=game.get("contrarian", False),
+                    key_number_edge=abs(game.get("spread", 0)) in [3, 7, 10]
+                )
+                game['confidence'] = confidence
+                game['sport'] = 'NFL'
+                game['id'] = f'nfl_{idx}'
+                all_games.append(game)
+        except Exception as e:
+            print(f"Failed to load NFL games: {e}")
     
     # Load NCAAF games
     if sport in ["all", "ncaaf"]:
-        ncaaf_games = load_ncaaf_games()
-        for idx, game in enumerate(ncaaf_games):
-            confidence = calculator.calculate_confidence(
-                sharp_action=game.get("sharp_action", False),
-                reverse_line_movement=game.get("reverse_line_movement", False),
-                steam_move=game.get("steam_move", False),
-                public_fade=game.get("contrarian", False),
-                key_number_edge=abs(game.get("spread", 0)) in [3, 7, 10, 14]
-            )
-            game['confidence'] = confidence
-            game['sport'] = 'NCAAF'
-            game['id'] = f'ncaaf_{idx}'
-            all_games.append(game)
+        try:
+            ncaaf_games = load_ncaaf_games()
+            for idx, game in enumerate(ncaaf_games):
+                confidence = calculator.calculate_confidence(
+                    sharp_action=game.get("sharp_action", False),
+                    reverse_line_movement=game.get("reverse_line_movement", False),
+                    steam_move=game.get("steam_move", False),
+                    public_fade=game.get("contrarian", False),
+                    key_number_edge=abs(game.get("spread", 0)) in [3, 7, 10, 14]
+                )
+                game['confidence'] = confidence
+                game['sport'] = 'NCAAF'
+                game['id'] = f'ncaaf_{idx}'
+                all_games.append(game)
+        except Exception as e:
+            print(f"Failed to load NCAAF games: {e}")
     
     # Load MLB games
     if sport in ["all", "mlb"]:
-        mlb_aggregator = MLBDataAggregator()
-        mlb_analyzer = MLBCompleteAnalyzer()
-        mlb_games_raw = mlb_aggregator.get_todays_games()
-        
-        for idx, game_raw in enumerate(mlb_games_raw):
-            # Analyze the game
-            analysis = mlb_analyzer.analyze_game(game_raw)
+        try:
+            mlb_aggregator = MLBDataAggregator()
+            mlb_analyzer = MLBCompleteAnalyzer()
+            mlb_games_raw = mlb_aggregator.get_todays_games()
             
-            # Convert to parlay format
-            game = {
-                'home_team': analysis['home_team'],
-                'away_team': analysis['away_team'],
-                'game_time': analysis['game_time'],
-                'spread': analysis.get('spread', 1.5),
-                'total': analysis.get('total', 8.5),
-                'pick': analysis['pick'],
-                'confidence': analysis['confidence'],
-                'sport': 'MLB',
-                'id': f'mlb_{idx}',
-                'sharp_action': analysis['confidence'] >= 0.52,
-                'venue': analysis.get('venue', '')
-            }
-            all_games.append(game)
+            for idx, game_raw in enumerate(mlb_games_raw):
+                # Analyze the game
+                analysis = mlb_analyzer.analyze_game(game_raw)
+                
+                # Convert to parlay format
+                game = {
+                    'home_team': analysis['home_team'],
+                    'away_team': analysis['away_team'],
+                    'game_time': analysis['game_time'],
+                    'spread': analysis.get('spread', 1.5),
+                    'total': analysis.get('total', 8.5),
+                    'pick': analysis['pick'],
+                    'confidence': analysis['confidence'],
+                    'sport': 'MLB',
+                    'id': f'mlb_{idx}',
+                    'sharp_action': analysis['confidence'] >= 0.52,
+                    'venue': analysis.get('venue', '')
+                }
+                all_games.append(game)
+        except Exception as e:
+            print(f"Failed to load MLB games: {e}")
     
     # Filter high confidence games (lowered threshold for more parlays)
     high_conf_games = [g for g in all_games if g['confidence'] >= 0.53]

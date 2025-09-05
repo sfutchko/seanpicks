@@ -12,7 +12,7 @@ import logging
 from app.database.connection import get_db
 from app.services.bet_tracker import BetTracker, ResultFetcher
 from app.models.bet_tracking import TrackedBet
-from app.routers.auth import get_current_user
+# Authentication removed - public access
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/tracking", tags=["tracking"])
@@ -23,7 +23,6 @@ async def track_bet(
     game: Dict,
     analysis: Dict,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
 ):
     """
     Track a best bet
@@ -38,7 +37,6 @@ async def create_snapshot(
     best_bets: List[Dict],
     sport: str = "NFL",
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
 ):
     """
     Create a snapshot of current best bets
@@ -57,7 +55,6 @@ async def get_performance(
     days: int = 7,
     sport: str = "NFL",
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
 ):
     """
     Get performance statistics for a specific sport
@@ -71,7 +68,6 @@ async def get_performance(
 async def get_pending_bets(
     sport: str = "NFL",
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
 ):
     """
     Get all pending tracked bets for a specific sport
@@ -99,7 +95,6 @@ async def get_recent_results(
     limit: int = 20,
     sport: str = "NFL",
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
 ):
     """
     Get recent bet results for a specific sport
@@ -113,7 +108,6 @@ async def get_recent_results(
 async def update_scores(
     sport: str = "americanfootball_nfl",
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
 ):
     """
     Fetch and update game scores for tracked bets
@@ -185,7 +179,6 @@ class TrackBetsRequest(BaseModel):
 async def track_current_best_bets(
     request: TrackBetsRequest,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
 ):
     """
     Track all current best bets from the dashboard
@@ -234,7 +227,6 @@ async def track_current_best_bets(
 async def get_bet_history(
     game_id: str,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
 ):
     """
     Get tracking history for a specific game
