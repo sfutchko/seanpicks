@@ -1084,6 +1084,7 @@ const Dashboard: React.FC = () => {
       
       {/* Help Modal */}
       <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
+    </div>
   );
 };
 
