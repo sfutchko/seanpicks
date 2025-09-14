@@ -15,9 +15,11 @@ from app.models.user import User
 # Authentication removed - public access
 from app.services.confidence_calculator import ConfidenceCalculator
 from app.services.complete_analyzer import CompleteAnalyzer
+from app.services.simplified_nfl_analyzer import SimplifiedNFLAnalyzer
 
-# Initialize the complete analyzer with ALL features
-complete_analyzer = CompleteAnalyzer()
+# Initialize BOTH analyzers - use simplified as primary
+simplified_analyzer = SimplifiedNFLAnalyzer()
+complete_analyzer = CompleteAnalyzer()  # Keep as fallback
 
 router = APIRouter()
 
@@ -177,19 +179,29 @@ async def get_nfl_games(
     analyzed_games = []
     
     for idx, game in enumerate(games_data):
-        # Use the COMPLETE analyzer for EVERY game!
-        full_analysis = complete_analyzer.analyze_game_complete(game)
-        confidence = full_analysis['final_confidence']
+        # Use SIMPLIFIED analyzer for better accuracy!
+        simple_analysis = simplified_analyzer.analyze_game(game)
+        
+        # Only use complete analyzer if simplified passes
+        if simple_analysis.get('confidence', 0) >= 0.52:
+            full_analysis = complete_analyzer.analyze_game_complete(game)
+            # Use simplified confidence (more conservative)
+            confidence = simple_analysis['confidence']
+        else:
+            # No edge - skip complex analysis
+            full_analysis = {'final_confidence': 0.48, 'factors': [], 'insights': []}
+            confidence = 0.48
         
         # Use patterns and insights from FULL analysis
         patterns = []
         for factor in full_analysis.get('factors', []):
             patterns.append(factor)
         
-        # Get the best bet from full analysis
-        best_bet = full_analysis.get('best_bet')
-        if best_bet:
-            pick = best_bet['pick']
+        # Use pick from simplified analyzer (more reliable)
+        if simple_analysis.get('pick'):
+            pick = simple_analysis['pick']
+        elif full_analysis.get('best_bet'):
+            pick = full_analysis['best_bet']['pick']
         elif confidence >= 0.54:
             # If we have edge but no specific bet, determine pick from spread
             # Pick the underdog by default when we have edge
@@ -291,7 +303,7 @@ async def get_nfl_games(
         if edge:
             analyzed_game["edge"] = edge
             
-        kelly = full_analysis.get('kelly_percentage', 0) if best_bet else 0
+        kelly = full_analysis.get('kelly_percentage', 0) if full_analysis.get('best_bet') else 0
         if kelly > 0:
             analyzed_game["kelly_bet"] = kelly
             
@@ -307,8 +319,8 @@ async def get_nfl_games(
         if abs(injuries) > 0.5:
             analyzed_game["injuries"] = injuries
             
-        if best_bet:
-            analyzed_game["best_bet_type"] = best_bet['type']
+        if full_analysis.get('best_bet'):
+            analyzed_game["best_bet_type"] = full_analysis['best_bet'].get('type', 'spread')
             
         # Add book odds if available
         if game.get('book_odds'):
