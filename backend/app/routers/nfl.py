@@ -332,7 +332,8 @@ async def get_nfl_games(
     
     # Sort by confidence for best bets
     analyzed_games.sort(key=lambda x: x['confidence'], reverse=True)
-    best_bets = [g for g in analyzed_games if g['confidence'] >= 0.54][:5]
+    # Adjusted threshold for conservative simplified analyzer
+    best_bets = [g for g in analyzed_games if g['confidence'] >= 0.52][:5]
     
     # Extract sharp plays
     sharp_plays = []
